@@ -108,7 +108,7 @@ which basically does this
    const { access_token, expires_in, refresh_token } = await response.json();
    ```
 
----
+
 
 ## update and return the new token
 
