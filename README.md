@@ -54,75 +54,68 @@ basically it does this
 //then it gives back the same access token and refresh token
 ```
 
+
 how it does it is by calling a post request to spotify  
 sends grant type = refreshtoken  
 sends refresh token  
 
 spotify sends back a new access token and a new refresh token  
 
+---
 
-authOptions explanation 
+## authOptions explanation
 
-providers: [SpotifyProvider(...)]
+### providers: [SpotifyProvider(...)]
 
-  this makes it support spotify out of box type shit 
+this makes it support spotify out of box type shit 
 
-secret: process.env.NEXTAUTH_SECRET
+### secret: process.env.NEXTAUTH_SECRET
 
-  used to encrypt and sign the jwt tokens and session cookies 
+used to encrypt and sign the jwt tokens and session cookies 
 
-callbacks: { ... } 
+### callbacks: { ... } 
 
-  customize how tokens and sessions are handled 
+customize how tokens and sessions are handled 
 
-jwt({ token, account }
+---
 
-  whenever a jwt token is created or updated
+### jwt({ token, account })
 
-if user signs in for the first time, 
-account is defined and 
+whenever a jwt token is created or updated
 
-  token.accessToken = account.access_token
-  
-  token.refreshToken = account.refresh_token
-  
-  token.expiresAt = account.expires_at * 1000 (converted to ms)
+if user signs in for the first time,  
+account is defined and:
 
+```js
+token.accessToken = account.access_token  
+token.refreshToken = account.refresh_token  
+token.expiresAt = account.expires_at * 1000 // (converted to ms)
+```
 
-if token is valid just return if not call the refresh function i talked abt before 
+if token is valid just return  
+if not call the refresh function i talked abt before 
 
+---
 
-async session({ session, token }) {
-      session.accessToken = token.accessToken;
-      return session;
-    },
-runs when a session is created or fetched (e.g. useSession() or getServerSession()).
+### async session({ session, token }) 
+
+```js
+session.accessToken = token.accessToken;
+return session;
+```
+
+runs when a session is created or fetched (e.g. useSession() or getServerSession()).  
 it returns the correct, up-to-date access token for the current session, whether it's newly logged in or refreshed.
 
-const session = await getServerSession(req, res, authOptions);
+---
 
-this basically does three parameter stuff 
+### const session = await getServerSession(req, res, authOptions);
 
-req reads my cookie and finds the session token 
+this basically does three parameter stuff:
 
-then it validates and encrypts it using next_auth_secret.
-
-then it runs my jwt callback and sesison callback to ultimatley return session as session variable 
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-
+- `req` reads my cookie and finds the session token  
+- then it validates and encrypts it using next_auth_secret  
+- then it runs my jwt callback and session callback to ultimately return session as session variable
 
 
 
