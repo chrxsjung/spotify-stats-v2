@@ -44,18 +44,6 @@ export default function Home() {
 
 happens and does all the redirect shit and the stuff.  
 then i define authoptions inside the `pages/api/auth/[...nextauth].js`  
-i import:
-
-```js
-import SpotifyProvider from "next-auth/providers/spotify";
-```
-
-how it does it is by calling a post request to spotify:  
-- sends `grant_type = refresh_token`  
-- sends `refresh_token`  
-- spotify sends back a new access token and a new refresh token  
-
----
 
 ## authOptions explanation
 
@@ -88,6 +76,51 @@ token.expiresAt = account.expires_at * 1000 // (converted to ms)
 
 if token is valid just return  
 if not call the refresh function i talked abt before.
+
+which basically does this 
+
+1. send a post request to spotify's token endpoint:
+   ```
+   https://accounts.spotify.com/api/token
+   ```
+
+2. the request must include:
+   - method: `POST`
+   - headers:
+     ```js
+     {
+       "Content-Type": "application/x-www-form-urlencoded",
+       Authorization: "Basic " + Buffer.from(
+         process.env.SPOTIFY_CLIENT_ID + ":" + process.env.SPOTIFY_CLIENT_SECRET
+       ).toString("base64")
+     }
+     ```
+   - body:
+     ```js
+     new URLSearchParams({
+       grant_type: "refresh_token",
+       refresh_token: token.refreshToken
+     })
+     ```
+
+3. spotify responds with:
+   ```js
+   const { access_token, expires_in, refresh_token } = await response.json();
+   ```
+
+---
+
+## update and return the new token
+
+```js
+return {
+  ...token,
+  accessToken: access_token,
+  expiresAt: Date.now() + expires_in * 1000,
+  refreshToken: refresh_token ?? token.refreshToken
+};
+```
+
 
 ---
 
