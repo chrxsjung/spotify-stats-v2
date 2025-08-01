@@ -99,12 +99,8 @@ export async function getUserGenres(timeRange = "long_term") {
 
   const data = await res.json();
 
-  const allGenres = data.items.flatMap((artist) => artist.genres);
-
-  const uniqueGenres = [...new Set(allGenres)];
-
   return {
-    genres: uniqueGenres,
+    genres: data.genres,
   };
 }
 
