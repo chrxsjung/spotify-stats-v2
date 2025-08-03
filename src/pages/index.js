@@ -26,8 +26,9 @@ export default function Home() {
         </h1>
 
         <p className="text-xl text-gray-400 font-medium mb-12 max-w-md">
-          Your personal music analytics dashboard
-        </p>
+  your personal music analytics dashboard. to request access, please email me first — spotify limits access to just 25 users.
+</p>
+
 
         <button
           onClick={handleLogin}
