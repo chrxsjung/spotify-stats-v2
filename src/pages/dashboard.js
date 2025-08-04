@@ -1,8 +1,8 @@
 import Profile from "@/components/Profile";
-import ArtistCard from "@/components/ArtistCard";
-import GenreCard from "@/components/GenreCard";
-import TrackCard from "@/components/TrackCard";
-import RecentlyPlayedCard from "@/components/RecentlyPlayedCard";
+import ArtistCard from "@/components/artist/ArtistCard";
+import GenreCard from "@/components/genre/GenreCard";
+import TrackCard from "@/components/track/TrackCard";
+import RecentlyPlayedCard from "@/components/recent/RecentlyPlayedCard";
 import LogoutButton from "@/components/Logout.jsx";
 
 function Dashboard() {

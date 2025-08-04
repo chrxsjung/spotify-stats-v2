@@ -1,8 +1,9 @@
-import { getUserGenres } from "../utils/spotify.js";
+import Artist from "./Artist.jsx";
+import { getSpotifyArtists } from "../../utils/spotify.js";
 import { useState, useEffect } from "react";
 
-function GenreCard() {
-  const [userGenres, setUserGenres] = useState([]);
+function ArtistCard() {
+  const [userArtists, setUserArtists] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("long_term");
@@ -21,23 +22,23 @@ function GenreCard() {
    */
   useEffect(() => {
     setLoading(true);
-    getUserGenres(timeRange)
+    getSpotifyArtists(timeRange)
       .then((data) => {
-        setUserGenres(data.genres);
+        setUserArtists(data);
         setError(null);
       })
       .catch((err) => {
-        console.error("❌ Failed to load genres:", err.message);
+        console.error("❌ Failed to load artists:", err.message);
         setError(err.message);
-        setUserGenres([]);
+        setUserArtists([]);
       })
       .finally(() => setLoading(false));
   }, [timeRange]);
 
   return (
-    <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-gray-800">
+    <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-gray-800 text-white">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white">Top Genres</h2>
+        <h2 className="text-xl font-bold text-white">Top Artists</h2>
         <div className="flex space-x-2">
           <button
             onClick={() => setTimeRange("long_term")}
@@ -62,6 +63,7 @@ function GenreCard() {
         </div>
       </div>
 
+      {/* Content */}
       <div className="flex flex-col max-h-96 overflow-y-auto space-y-1 pr-4">
         {loading && (
           <div className="flex items-center justify-center py-8">
@@ -71,36 +73,16 @@ function GenreCard() {
 
         {error && (
           <div className="text-red-400 text-center py-4">
-            Failed to load genres: {error}
+            Failed to load artists: {error}
           </div>
         )}
 
-        {!loading && !error && userGenres.length === 0 && (
-          <div className="text-gray-400 text-center py-4">No genres found.</div>
-        )}
-
-        {!loading && !error && userGenres.length > 0 && (
-          <div className="space-y-3 mt-4">
-            {userGenres.map((genre, index) => (
-              <div
-                key={index}
-                className="bg-black/30 rounded-lg p-3 hover:bg-black/40 transition-colors duration-200"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="capitalize text-white font-medium text-lg">
-                    {genre}
-                  </span>
-                  <span className="text-green-400 text-sm font-bold">
-                    #{index + 1}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {userArtists?.artists?.map((artist, index) => (
+          <Artist key={artist.id} artist={artist} index={index} />
+        ))}
       </div>
     </div>
   );
 }
 
-export default GenreCard;
+export default ArtistCard;

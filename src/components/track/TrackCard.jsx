@@ -1,44 +1,32 @@
-import Artist from "./Artist.jsx";
-import { getSpotifyArtists } from "../utils/spotify.js";
+import Track from "./Track.jsx";
+import { getSpotifyTracks } from "../../utils/spotify.js";
 import { useState, useEffect } from "react";
 
-function ArtistCard() {
-  const [userArtists, setUserArtists] = useState(null);
+function TrackCard() {
+  const [userTracks, setUserTracks] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState("long_term");
 
-  /*
-   * STATE-DRIVEN RE-RENDERING LOGIC:
-   *
-   * 1. timeRange is stored in useState (starts as "long_term")
-   * 2. when a button is clicked, setTimeRange() is called
-   * 3. this changes the timeRange state value
-   * 4. because timeRange is in the useEffect dependency array [timeRange]
-   * 5. the useEffect automatically runs again with the new timeRange value
-   * 6. this triggers a new API call and re-renders the component with fresh data
-   *
-   * flow: button click → setTimeRange() → state change → useEffect runs → new data
-   */
   useEffect(() => {
     setLoading(true);
-    getSpotifyArtists(timeRange)
+    getSpotifyTracks(timeRange)
       .then((data) => {
-        setUserArtists(data);
+        setUserTracks(data);
         setError(null);
       })
       .catch((err) => {
-        console.error("❌ Failed to load artists:", err.message);
+        console.error("❌ Failed to load tracks:", err.message);
         setError(err.message);
-        setUserArtists([]);
+        setUserTracks([]);
       })
       .finally(() => setLoading(false));
   }, [timeRange]);
 
   return (
-    <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-gray-800 text-white">
+    <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 border border-gray-800">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white">Top Artists</h2>
+        <h2 className="text-xl font-bold text-white">Top Tracks</h2>
         <div className="flex space-x-2">
           <button
             onClick={() => setTimeRange("long_term")}
@@ -73,16 +61,16 @@ function ArtistCard() {
 
         {error && (
           <div className="text-red-400 text-center py-4">
-            Failed to load artists: {error}
+            Failed to load tracks: {error}
           </div>
         )}
 
-        {userArtists?.artists?.map((artist, index) => (
-          <Artist key={artist.id} artist={artist} index={index} />
+        {userTracks?.tracks?.map((track, index) => (
+          <Track key={track.id} track={track} index={index} />
         ))}
       </div>
     </div>
   );
 }
 
-export default ArtistCard;
+export default TrackCard;
