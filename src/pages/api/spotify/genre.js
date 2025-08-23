@@ -11,7 +11,13 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: "Not authenticated" });
 
     const { time_range = "long_term" } = req.query;
-    
+
+    // Validate time_range parameter
+    const validTimeRanges = ["short_term", "medium_term", "long_term"];
+    if (!validTimeRanges.includes(time_range)) {
+      return res.status(400).json({ error: "Invalid time_range parameter" });
+    }
+
     const r = await fetch(
       `https://api.spotify.com/v1/me/top/artists?time_range=${time_range}&limit=50`,
       {
@@ -32,7 +38,8 @@ export default async function handler(req, res) {
     res.setHeader("Cache-Control", "no-store");
     return res.status(200).json({ items: data.items, genres: uniqueGenres });
   } catch (error) {
-    console.error("Genres API error:", error);
+    // Log error without sensitive data
+    console.error("Genres API error:", error.message);
     res.status(500).json({ error: "Failed to fetch genres" });
   }
 }

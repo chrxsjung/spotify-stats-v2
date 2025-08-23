@@ -30,7 +30,8 @@ export default async function handler(req, res) {
       images: data.images,
     });
   } catch (error) {
-    console.error("Profile API error:", error);
+    // Log error without sensitive data
+    console.error("Profile API error:", error.message);
     res.status(500).json({ error: "Failed to fetch profile" });
   }
 }

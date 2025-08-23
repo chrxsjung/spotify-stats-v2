@@ -39,7 +39,8 @@ export default async function handler(req, res) {
       progress_ms: data.progress_ms,
     });
   } catch (error) {
-    console.error("Currently playing API error:", error);
+    // Log error without sensitive data
+    console.error("Currently playing API error:", error.message);
     res.status(500).json({ error: "Failed to fetch currently playing" });
   }
 } 
