@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]";
+import { getToken } from "next-auth/jwt";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -7,32 +6,30 @@ export default async function handler(req, res) {
   }
 
   try {
-    const session = await getServerSession(req, res, authOptions);
-    
-    if (!session) {
+    const jwt = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+    const { limit = 50 } = req.query;
+
+    if (!jwt?.accessToken) {
       return res.status(401).json({ error: "Not authenticated" });
     }
 
-    const { limit = 50 } = req.query;
-    
-    const response = await fetch(
+    const r = await fetch(
       `https://api.spotify.com/v1/me/player/recently-played?limit=${limit}`,
       {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${jwt.accessToken}` },
+        cache: "no-store",
       }
     );
 
-    if (!response.ok) {
+    if (!r.ok) {
       throw new Error("Failed to fetch recently played");
     }
 
-    const data = await response.json();
-    
-    res.status(200).json({
-      items: data.items,
-    });
+    const data = await r.json();
+
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(200).json({ items: data.items });
   } catch (error) {
     console.error("Recently played API error:", error);
     res.status(500).json({ error: "Failed to fetch recently played" });

@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]";
+import { getToken } from "next-auth/jwt";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -7,29 +6,27 @@ export default async function handler(req, res) {
   }
 
   try {
-    const session = await getServerSession(req, res, authOptions);
-
-    if (!session) {
+    const jwt = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (!jwt?.accessToken)
       return res.status(401).json({ error: "Not authenticated" });
-    }
 
-    const response = await fetch("https://api.spotify.com/v1/me", {
-      headers: {
-        Authorization: `Bearer ${session.accessToken}`,
-      },
+    const r = await fetch("https://api.spotify.com/v1/me", {
+      headers: { Authorization: `Bearer ${jwt.accessToken}` },
+      cache: "no-store",
     });
 
-    if (!response.ok) {
+    if (!r.ok) {
       throw new Error("Failed to fetch profile");
     }
 
-    const data = await response.json();
+    const data = await r.json();
+    
 
-
-    res.status(200).json({
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(200).json({
       display_name: data.display_name,
       country: data.country,
-      followers: data.followers?.total,
+      followers: data.followers.total,
       images: data.images,
     });
   } catch (error) {

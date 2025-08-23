@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../auth/[...nextauth]";
+import { getToken } from "next-auth/jwt";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -7,32 +6,28 @@ export default async function handler(req, res) {
   }
 
   try {
-    const session = await getServerSession(req, res, authOptions);
-
-    if (!session) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
+    const jwt = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const { time_range = "long_term" } = req.query;
 
-    const response = await fetch(
+    if (!jwt?.accessToken)
+      return res.status(401).json({ error: "Not authenticated" });
+
+    const r = await fetch(
       `https://api.spotify.com/v1/me/top/tracks?time_range=${time_range}&limit=50`,
       {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${jwt.accessToken}` },
+        cache: "no-store",
       }
     );
 
-    if (!response.ok) {
+    if (!r.ok) {
       throw new Error("Failed to fetch tracks");
     }
 
-    const data = await response.json();
+    const data = await r.json();
 
-    res.status(200).json({
-      items: data.items,
-    });
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(200).json({ items: data.items });
   } catch (error) {
     console.error("Tracks API error:", error);
     res.status(500).json({ error: "Failed to fetch tracks" });
